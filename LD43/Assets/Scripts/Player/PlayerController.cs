@@ -16,6 +16,21 @@ public class PlayerController : MonoBehaviour {
     [SerializeField]
     float m_speed = 2.0f;
 
+    [SerializeField]
+    AudioClip m_jumpSound;
+
+    [SerializeField]
+    AudioClip m_convertSound;
+
+    [SerializeField]
+    AudioClip m_laughSound;
+
+    [SerializeField]
+    AudioSource m_incidentalAudio;
+
+    [SerializeField]
+    AudioSource m_footstepsAudio;
+
     Animator m_animController;
     Rigidbody2D m_rigidbody;
 
@@ -47,12 +62,7 @@ public class PlayerController : MonoBehaviour {
         bool activateAltar = !m_onAltar && NextToAltar && AltarTransform != null && Input.GetButton("Submit");
         if(activateAltar)
         {
-            ActivateAltar?.Invoke();
-            m_animController.SetTrigger("Lie");
-            m_onAltar = true;
-            m_rigidbody.isKinematic = true;
-            m_rigidbody.MovePosition(AltarTransform.position);
-            m_rigidbody.velocity = Vector2.zero;
+            StartCoroutine(OnActivateAltar());
         }
         else if(!m_onAltar)
         {
@@ -65,6 +75,8 @@ public class PlayerController : MonoBehaviour {
 
             if (jump && !m_jumping)
             {
+                m_incidentalAudio.PlayOneShot(m_jumpSound, 1.0f);
+
                 m_rigidbody.AddForce(new Vector2(0, 5.0f), ForceMode2D.Impulse);
                 m_jumping = true;
             }
@@ -80,6 +92,16 @@ public class PlayerController : MonoBehaviour {
             bool running = animSpeed > 0.01;
 
             m_animController.SetBool("Running", running);
+
+            if (running && OnGround())
+            {
+                 if(!m_footstepsAudio.isPlaying) m_footstepsAudio.Play();
+            }
+
+            else
+            {
+                m_footstepsAudio.Stop();
+            }
 
             if (!running)
             {
@@ -118,6 +140,7 @@ public class PlayerController : MonoBehaviour {
     private IEnumerator KillCoroutine()
     {
         m_animController.SetTrigger("Convert");
+        m_incidentalAudio.PlayOneShot(m_convertSound, 1.0f);
         yield return new WaitForSeconds(2);
         if(Death != null) Death.Invoke();
     }
@@ -127,5 +150,20 @@ public class PlayerController : MonoBehaviour {
         m_animController.SetTrigger("Respawn");
         m_onAltar = false;
         m_rigidbody.isKinematic = false;
+    }
+
+    private IEnumerator OnActivateAltar()
+    {
+        ActivateAltar?.Invoke();
+        m_animController.SetTrigger("Lie");
+        m_onAltar = true;
+        m_rigidbody.isKinematic = true;
+        m_rigidbody.MovePosition(AltarTransform.position);
+        m_rigidbody.velocity = Vector2.zero;
+        m_footstepsAudio.Stop();
+
+        yield return new WaitForSeconds(1);
+
+        m_incidentalAudio.PlayOneShot(m_laughSound, 1.0f);
     }
 }
