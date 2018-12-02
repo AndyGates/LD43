@@ -5,6 +5,12 @@ using UnityEngine;
 public class CameraMoveNext : MonoBehaviour {
 
     RoomCamera m_cam;
+    bool m_used;
+
+    public void ResetUsed()
+    {
+        m_used = false;
+    }
 
     private void Awake()
     {
@@ -13,6 +19,10 @@ public class CameraMoveNext : MonoBehaviour {
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        m_cam.MoveNext();
+        if(!m_used)
+        {
+            m_cam.MoveNext();
+            m_used = true;
+        }
     }
 }

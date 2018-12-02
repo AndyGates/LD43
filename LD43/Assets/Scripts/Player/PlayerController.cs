@@ -23,9 +23,6 @@ public class PlayerController : MonoBehaviour {
     AudioClip m_convertSound;
 
     [SerializeField]
-    AudioClip m_laughSound;
-
-    [SerializeField]
     AudioSource m_incidentalAudio;
 
     [SerializeField]
@@ -163,7 +160,5 @@ public class PlayerController : MonoBehaviour {
         m_footstepsAudio.Stop();
 
         yield return new WaitForSeconds(1);
-
-        m_incidentalAudio.PlayOneShot(m_laughSound, 1.0f);
     }
 }
