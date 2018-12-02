@@ -1,10 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour {
+
+    public Action Death { get; internal set; }
+    public Action ActivateAltar { get; internal set; }
+
+    public bool NextToAltar { get; set; } = false;
+    public Transform AltarTransform { get; set; }
 
     [SerializeField]
     float m_speed = 2.0f;
@@ -14,6 +21,7 @@ public class PlayerController : MonoBehaviour {
 
     bool m_dir = false;
     bool m_jumping = false;
+    bool m_onAltar = false;
 
     SpriteRenderer[] m_renderers;
 
@@ -36,41 +44,54 @@ public class PlayerController : MonoBehaviour {
 
     private void FixedUpdate()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        bool jump = Input.GetButton("Jump");
-        bool duck = Input.GetButton("Duck");
-
-        float velX = moveX * m_speed;
-        m_rigidbody.velocity = new Vector2(velX, m_rigidbody.velocity.y);
-
-        if (jump && !m_jumping)
+        bool activateAltar = !m_onAltar && NextToAltar && AltarTransform != null && Input.GetButton("Submit");
+        if(activateAltar)
         {
-            m_rigidbody.AddForce(new Vector2(0, 5.0f), ForceMode2D.Impulse);
-            m_jumping = true;
+            ActivateAltar?.Invoke();
+            m_animController.SetTrigger("Lie");
+            m_onAltar = true;
+            m_rigidbody.isKinematic = true;
+            m_rigidbody.MovePosition(AltarTransform.position);
+            m_rigidbody.velocity = Vector2.zero;
         }
-        else if (m_jumping)
+        else if(!m_onAltar)
         {
-            if (OnGround())
+            float moveX = Input.GetAxis("Horizontal");
+            bool jump = Input.GetButton("Jump");
+            bool duck = Input.GetButton("Duck");
+
+            float velX = moveX * m_speed;
+            m_rigidbody.velocity = new Vector2(velX, m_rigidbody.velocity.y);
+
+            if (jump && !m_jumping)
             {
-                m_jumping = false;
+                m_rigidbody.AddForce(new Vector2(0, 5.0f), ForceMode2D.Impulse);
+                m_jumping = true;
             }
-        }
+            else if (m_jumping)
+            {
+                if (OnGround())
+                {
+                    m_jumping = false;
+                }
+            }
 
-        float animSpeed = m_rigidbody.velocity.magnitude;
-        bool running = animSpeed > 0.01;
+            float animSpeed = m_rigidbody.velocity.magnitude;
+            bool running = animSpeed > 0.01;
 
-        m_animController.SetBool("Running", running);
+            m_animController.SetBool("Running", running);
 
-        if (!running)
-        {
-            animSpeed = 1.0f;
-        }
+            if (!running)
+            {
+                animSpeed = 1.0f;
+            }
 
-        m_animController.speed = animSpeed;
+            m_animController.speed = animSpeed;
 
-        if (moveX != 0)
-        {
-            SetDirection(moveX < 0);
+            if (moveX != 0)
+            {
+                SetDirection(moveX < 0);
+            }
         }
     }
 
@@ -87,5 +108,17 @@ public class PlayerController : MonoBehaviour {
         LayerMask mask = LayerMask.GetMask("Environment");
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 0.45f, mask.value);
         return hit.collider != null;
+    }
+
+    public void Kill()
+    {
+        if(Death != null) Death.Invoke();
+    }
+
+    public void Respawn()
+    {
+        m_animController.SetTrigger("Respawn");
+        m_onAltar = false;
+        m_rigidbody.isKinematic = false;
     }
 }
