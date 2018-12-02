@@ -61,12 +61,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Altar.cs" />
+    <Compile Include="Assets\Scripts\CameraMoveNext.cs" />
+    <Compile Include="Assets\Scripts\Enemy\ContactObject.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyController.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyManager.cs" />
     <Compile Include="Assets\Scripts\NPC\NPCController.cs" />
     <Compile Include="Assets\Scripts\NPC\NPCManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerManager.cs" />
+    <Compile Include="Assets\Scripts\RoomCamera.cs" />
     <Compile Include="Assets\Scripts\States\ActivateAltarStateBehaviour.cs" />
     <Compile Include="Assets\Scripts\States\AnyKeyStateBehaviour.cs" />
     <Compile Include="Assets\Scripts\States\AutoExitStateBehaviour.cs" />

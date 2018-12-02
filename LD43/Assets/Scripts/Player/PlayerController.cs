@@ -112,6 +112,13 @@ public class PlayerController : MonoBehaviour {
 
     public void Kill()
     {
+        StartCoroutine(KillCoroutine()); 
+    }
+
+    private IEnumerator KillCoroutine()
+    {
+        m_animController.SetTrigger("Convert");
+        yield return new WaitForSeconds(2);
         if(Death != null) Death.Invoke();
     }
 
